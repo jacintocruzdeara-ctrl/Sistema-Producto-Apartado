@@ -1,0 +1,22 @@
+@import "tailwindcss";
+a:hover {
+  background: #2563eb !important;
+  transform: scale(1.05);
+}
+
+a.active {
+  background: #2563eb !important;
+  font-weight: bold;
+}
+
+/* ❌ quitar flechas en Chrome, Edge */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ❌ quitar flechas en Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
