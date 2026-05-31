@@ -1,5 +1,3 @@
-
-
 import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
 
@@ -20,51 +18,81 @@ export function Panel() {
 
   const [editando, setEditando] = useState(null);
 
-  const guardar = async () => {
+  const usuario = JSON.parse(
+    localStorage.getItem("usuario")
+  );
 
-  if (!nuevo.nombre || !nuevo.precio) return;
+  // 🔒 SOLO ADMIN
+  if (usuario?.rol !== "admin") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-10 rounded-2xl shadow-xl">
+          <h1 className="text-4xl font-bold text-red-600 text-center">
+            Acceso Denegado
+          </h1>
 
-  const datos = {
-    nombre: nuevo.nombre,
-    precio: Number(nuevo.precio), // 🔥 importante
-    imagen: nuevo.imagen
-  };
-
-  if (editando) {
-    await actualizarProducto(editando, datos);
-    setEditando(null);
-  } else {
-    await agregarProducto(datos);
+          <p className="text-center text-gray-600 mt-4">
+            No tienes permisos para acceder a este panel.
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  setNuevo({ nombre: "", precio: "", imagen: "" });
+  const guardar = async () => {
 
-};
+    if (!nuevo.nombre || !nuevo.precio) return;
+
+    const datos = {
+      nombre: nuevo.nombre,
+      precio: Number(nuevo.precio),
+      imagen: nuevo.imagen
+    };
+
+    if (editando) {
+      await actualizarProducto(editando, datos);
+      setEditando(null);
+    } else {
+      await agregarProducto(datos);
+    }
+
+    setNuevo({
+      nombre: "",
+      precio: "",
+      imagen: ""
+    });
+  };
+
   const editar = (p) => {
+
     setNuevo({
       nombre: p.nombre,
       precio: p.precio,
       imagen: p.imagen
     });
+
     setEditando(p._id);
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
 
-      {/* HEADER text-3xl	texto grande font-bold	negrita*/}
+      {/* HEADER */}
       <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b-4 border-blue-500 pb-2 w-fit">
-         Panel de Control
+        Panel de Control
       </h2>
 
       {/* FORM */}
       <div className="bg-white p-4 rounded-xl shadow mb-6 flex flex-wrap gap-3">
-{/*<input Campos de formulario.*/}
+
         <input
           placeholder="Nombre"
           value={nuevo.nombre}
           onChange={(e) =>
-            setNuevo({ ...nuevo, nombre: e.target.value })
+            setNuevo({
+              ...nuevo,
+              nombre: e.target.value
+            })
           }
           className="border p-2 rounded w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
@@ -74,7 +102,10 @@ export function Panel() {
           type="number"
           value={nuevo.precio}
           onChange={(e) =>
-            setNuevo({ ...nuevo, precio: e.target.value })
+            setNuevo({
+              ...nuevo,
+              precio: e.target.value
+            })
           }
           className="border p-2 rounded w-40 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
@@ -83,7 +114,10 @@ export function Panel() {
           placeholder="URL imagen"
           value={nuevo.imagen}
           onChange={(e) =>
-            setNuevo({ ...nuevo, imagen: e.target.value })
+            setNuevo({
+              ...nuevo,
+              imagen: e.target.value
+            })
           }
           className="border p-2 rounded flex-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
@@ -100,14 +134,14 @@ export function Panel() {
       {/* LISTA */}
       <div className="grid gap-4">
 
-        {productos?.map(p => (
+        {productos?.map((p) => (
           <div
             key={p._id}
             className="bg-white p-4 rounded-xl shadow flex items-center justify-between"
           >
 
-            {/* INFO */}
             <div className="flex items-center gap-4">
+
               <img
                 src={p.imagen}
                 alt={p.nombre}
@@ -115,12 +149,17 @@ export function Panel() {
               />
 
               <div>
-                <p className="font-semibold text-gray-800">{p.nombre}</p>
-                <p className="text-gray-500">${p.precio}</p>
+                <p className="font-semibold text-gray-800">
+                  {p.nombre}
+                </p>
+
+                <p className="text-gray-500">
+                  ${p.precio}
+                </p>
               </div>
+
             </div>
 
-            {/* BOTONES */}
             <div className="flex gap-2">
 
               <button
