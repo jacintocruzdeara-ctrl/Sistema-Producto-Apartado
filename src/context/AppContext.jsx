@@ -1,26 +1,25 @@
-
-
 import React, { createContext, useState, useEffect } from "react";
 
 export const AppContext = createContext();
 
 export function AppProvider({ children }) {
-
   const [productos, setProductos] = useState([]);
   const [apartados, setApartados] = useState([]);
 
-  // 🔐 LOGIN USER
+  // 🔐 Usuario
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user")) || null
   );
 
-  // 🔥 APIs
-  const API = "http://localhost:4000/api/producto";
-  const API_APARTADO = "http://localhost:4000/api/apartado";
-  const API_LOGIN = "http://localhost:4000/api/login";
+  // 🌐 URL BASE DE LA API
+  const BASE_URL = "https://api-proyecto-dany2.onrender.com";
+
+  const API_PRODUCTOS = `${BASE_URL}/api/producto`;
+  const API_APARTADOS = `${BASE_URL}/api/apartado`;
+  const API_LOGIN = `${BASE_URL}/api/login`;
 
   // =====================================================
-  // 🔵 LOGIN
+  // 🔐 LOGIN
   // =====================================================
 
   const login = (data) => {
@@ -36,8 +35,10 @@ export function AppProvider({ children }) {
   const iniciarSesion = async (form) => {
     const res = await fetch(API_LOGIN, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
     });
 
     if (!res.ok) {
@@ -45,47 +46,72 @@ export function AppProvider({ children }) {
     }
 
     const data = await res.json();
+
     login(data);
+
     return data;
   };
 
   // =====================================================
-  // 🔵 PRODUCTOS
+  // 📦 PRODUCTOS
   // =====================================================
 
   const obtenerProductos = async () => {
-    const res = await fetch(API);
-    const data = await res.json();
-    setProductos(data);
+    try {
+      const res = await fetch(API_PRODUCTOS);
+      const data = await res.json();
+      setProductos(data);
+    } catch (error) {
+      console.error("Error obteniendo productos:", error);
+    }
   };
 
-  const agregarProducto = async (prod) => {
-    await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(prod)
-    });
+  const agregarProducto = async (producto) => {
+    try {
+      await fetch(API_PRODUCTOS, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(producto),
+      });
 
-    obtenerProductos();
+      await obtenerProductos();
+    } catch (error) {
+      console.error("Error agregando producto:", error);
+    }
   };
 
   const eliminarProducto = async (id) => {
-    await fetch(`${API}/${id}`, { method: "DELETE" });
-    obtenerProductos();
+    try {
+      await fetch(`${API_PRODUCTOS}/${id}`, {
+        method: "DELETE",
+      });
+
+      await obtenerProductos();
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+    }
   };
 
   const actualizarProducto = async (id, datos) => {
-    await fetch(`${API}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombre: datos.nombre,
-        precio: Number(datos.precio),
-        imagen: datos.imagen
-      })
-    });
+    try {
+      await fetch(`${API_PRODUCTOS}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: datos.nombre,
+          precio: Number(datos.precio),
+          imagen: datos.imagen,
+        }),
+      });
 
-    await obtenerProductos();
+      await obtenerProductos();
+    } catch (error) {
+      console.error("Error actualizando producto:", error);
+    }
   };
 
   // =====================================================
@@ -93,59 +119,55 @@ export function AppProvider({ children }) {
   // =====================================================
 
   const obtenerApartados = async () => {
-    const res = await fetch(API_APARTADO);
-    const data = await res.json();
-    setApartados(data);
+    try {
+      const res = await fetch(API_APARTADOS);
+      const data = await res.json();
+      setApartados(data);
+    } catch (error) {
+      console.error("Error obteniendo apartados:", error);
+    }
   };
 
-  const apartarProducto = async (p) => {
-    const nuevo = {
-      nombre: p.nombre,
-      precio: p.precio,
-      imagen: p.imagen
-    };
+  const apartarProducto = async (producto) => {
+    try {
+      const nuevo = {
+        nombre: producto.nombre,
+        precio: producto.precio,
+        imagen: producto.imagen,
+      };
 
-    const res = await fetch(API_APARTADO, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(nuevo)
-    });
+      const res = await fetch(API_APARTADOS, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(nuevo),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setApartados((prev) => [...prev, data]);
+      setApartados((prev) => [...prev, data]);
+    } catch (error) {
+      console.error("Error apartando producto:", error);
+    }
   };
-
- 
-
-
-
 
   const eliminarApartado = async (id) => {
+    try {
+      await fetch(`${API_APARTADOS}/${id}`, {
+        method: "DELETE",
+      });
 
-  try {
+      setApartados((prev) =>
+        prev.filter((item) => item._id !== id)
+      );
 
-    // 🔥 ELIMINAR EN MONGODB
-    await fetch(`http://localhost:4000/api/apartado/${id}`, {
-      method: "DELETE"
-    });
-
-    // 🔥 ACTUALIZAR ESTADO
-    setApartados(
-      apartados.filter((item) => item._id !== id)
-    );
-
-    alert("Apartado eliminado ✔");
-
-  } catch (error) {
-
-    console.log(error);
-
-    alert("Error al eliminar");
-
-  }
-
-};
+      alert("Apartado eliminado ✔");
+    } catch (error) {
+      console.error(error);
+      alert("Error al eliminar apartado");
+    }
+  };
 
   // =====================================================
   // 🚀 CARGA INICIAL
@@ -161,26 +183,28 @@ export function AppProvider({ children }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{
+    <AppContext.Provider
+      value={{
+        // Productos
+        productos,
+        obtenerProductos,
+        agregarProducto,
+        eliminarProducto,
+        actualizarProducto,
 
-      // 🔵 productos
-      productos,
-      agregarProducto,
-      eliminarProducto,
-      actualizarProducto,
+        // Apartados
+        apartados,
+        obtenerApartados,
+        apartarProducto,
+        eliminarApartado,
 
-      // 🛒 apartados
-      apartados,
-      apartarProducto,
-      eliminarApartado,
-
-      // 🔐 login
-      user,
-      login,
-      logout,
-      iniciarSesion
-
-    }}>
+        // Usuario
+        user,
+        login,
+        logout,
+        iniciarSesion,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
