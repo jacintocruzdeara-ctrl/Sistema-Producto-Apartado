@@ -19,7 +19,7 @@ export function Registro() {
 
     try {
 
-      const res = await fetch("http://localhost:4000/api/registro", {
+   const res = await fetch("https://api-proyecto-dany2.onrender.com/api/registro",  {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
