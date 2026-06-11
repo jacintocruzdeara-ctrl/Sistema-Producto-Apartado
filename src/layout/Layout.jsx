@@ -8,7 +8,7 @@ export function Layout({ children }) {
       {/* HEADER */}
       <header className="bg-white shadow-md py-4">
         <h1 className="text-center text-2xl font-bold text-gray-800">
-          Tienda 🏠 Cruz
+          Familia Cruz
         </h1>
       </header>
 
